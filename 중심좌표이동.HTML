@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>glass의 Kakao 지도 시작하기</title>
+</head>
+<body>
+    <div id="map" style="width:600px;height:600px;"></div>
+    <p>
+        <button onclick="setCenter()">중심좌표이동</button> 
+        <button onclick="panTo()">그냥이동(부드럽게)</button> 
+        <button onclick="panTo1()">그냥이동(막그냥)</button> 
+    </p>
+
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=18b3fb379d9a4e523f45861623d0dee1"></script>
+<script>
+    var container = document.getElementById('map');
+    var options = {
+        center: new kakao.maps.LatLng(37.667503, 127.044575),//중심좌표 >방학역 
+        level: 5
+    };
+
+    var map = new kakao.maps.Map(container, options);
+    
+    function setCenter() {            
+        var moveLatLon = new kakao.maps.LatLng(37.514167, 126.942917); // 이동할 위도 경도 위치>노량진역
+        map.setCenter(moveLatLon);  // 지도 중심좌표를 이동
+    }
+    function panTo() {
+    var moveLatLon = new kakao.maps.LatLng(37.521624, 126.924191); // 이동할 위도 경도 위치>여의도역
+    // 지도 중심을 부드럽게 이동
+    map.panTo(moveLatLon);            
+    } // 만약 이동할 거리가 지도 화면보다 크면 부드러운 효과 없이 이동합니다
+    function panTo1() {
+    var moveLatLon = new kakao.maps.LatLng(37.667503, 127.044575); // 이동할 위도 경도 위치>방학역
+    map.panTo(moveLatLon);            
+    }    
+</script>
+</body>
+</html>
