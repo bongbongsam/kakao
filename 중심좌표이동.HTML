@@ -5,12 +5,18 @@
     <title>glass의 Kakao 지도 시작하기</title>
 </head>
 <body>
-    <div id="map" style="width:600px;height:600px;"></div>
-    <p>
-        <button onclick="setCenter()">중심좌표이동</button> 
-        <button onclick="panTo()">그냥이동(부드럽게)</button> 
-        <button onclick="panTo1()">그냥이동(막그냥)</button> 
+    <div id="map" style="width:100% ;height:600px;"></div>
+<p>
+        <button onclick="setCenter()">중심좌표이동</button>
+        <button onclick="panTo()">그냥이동(부드럽게)</button>
+        <button onclick="panTo1()">그냥이동(막그냥)</button>
+        <span id="mapLatLng"></span>
     </p>
+<p>
+    <button onclick="zoomIn()">지도레벨(확대) - 1</button>
+    <button onclick="zoomOut()">지도레벨(축소) + 1</button>
+    <span id="maplevel"></span>
+</p>
 
     <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=18b3fb379d9a4e523f45861623d0dee1"></script>
 <script>
@@ -21,20 +27,61 @@
     };
 
     var map = new kakao.maps.Map(container, options);
-    
+ 
+/////****************** 지도 이동 *************************/////   
+
+displayLatLng(); // 지도 위치 표시
+
     function setCenter() {            
         var moveLatLon = new kakao.maps.LatLng(37.514167, 126.942917); // 이동할 위도 경도 위치>노량진역
-        map.setCenter(moveLatLon);  // 지도 중심좌표를 이동
+        map.setCenter(moveLatLon);   // 지도 중심좌표를 이동
+        var center = map.getCenter();
+        displayLatLng();
     }
+    
     function panTo() {
     var moveLatLon = new kakao.maps.LatLng(37.521624, 126.924191); // 이동할 위도 경도 위치>여의도역
     // 지도 중심을 부드럽게 이동
-    map.panTo(moveLatLon);            
+    map.panTo(moveLatLon); 
+    var center = map.getCenter();
+        displayLatLng();        
     } // 만약 이동할 거리가 지도 화면보다 크면 부드러운 효과 없이 이동합니다
     function panTo1() {
     var moveLatLon = new kakao.maps.LatLng(37.667503, 127.044575); // 이동할 위도 경도 위치>방학역
-    map.panTo(moveLatLon);            
+    map.panTo(moveLatLon);   
+    var center = map.getCenter();
+        displayLatLng();
+    }  
+
+    function displayLatLng(){
+        var LatLngEl = document.getElementById('mapLatLng');  //<span id="maplevel"></span>구간에  levelEl값 표시
+        LatLngEl.innerHTML = '현재 지도 중심의 위도와 경도는 ' + map.getCenter() + ' 입니다.';ㅎ
+    } 
+
+
+/////****************** 지도 레벨 *************************/////
+//(지도의 확대 수준(value 1:확대 ~ 4:축소)) 레벨값이 변하면 기본 지도의 레벨값에 고정반영됨
+    
+    displayLevel();  // 지도 레벨 표시
+    //***** 지도 확대 함수
+    function zoomIn() {       
+        var level = map.getLevel(); // 현재 지도의 레벨 가져오기
+        map.setLevel(level - 1); 
+
+        displayLevel(); // 지도 레벨 표시
     }    
+     //*****지도 축소 함수
+    function zoomOut() {    
+        var level = map.getLevel(); // 현재 지도의 레벨 가져오기
+        map.setLevel(level + 1); // 1 레벨 축소
+
+        displayLevel(); // 지도 레벨 표시
+    }       
+    //*****화면 표시 함수
+    function displayLevel(){
+        var levelEl = document.getElementById('maplevel');  //<span id="maplevel"></span>구간에  levelEl값 표시
+        levelEl.innerHTML = '현재 지도 레벨은 ' + map.getLevel() + ' 레벨 입니다.';
+     }  
 </script>
 </body>
 </html>
