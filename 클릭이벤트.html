@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>glass의 Kakaomap 2.6 클릭표시</title>
+    <style>
+        html, body {width:100%;height:100%;margin:0;padding:0;}
+        .map_wrap {position:relative;overflow:hidden;width:100%;height:600px;}
+
+        .radius_border{border:1px solid #919191;border-radius:5px;}  
+
+        .custom_typecontrol {position:absolute;top:10px;right:10px;overflow:hidden;
+                            width:195px;height:30px;margin:0;padding:0;z-index:1;font-size:12px;font-family:'Malgun Gothic', '맑은 고딕', sans-serif;}
+        .custom_typecontrol span {display:block;width:65px;height:30px;float:left;text-align:center;line-height:30px;cursor:pointer;}
+        .custom_typecontrol .btn {background:#fff;background:linear-gradient(#fff,  #e6e6e6);}      
+        .custom_typecontrol .btn:hover {background:#f5f5f5;background:linear-gradient(#f5f5f5,#e3e3e3);}
+        .custom_typecontrol .btn:active {background:#e6e6e6;background:linear-gradient(#e6e6e6, #fff);}    
+        .custom_typecontrol .selected_btn {color:#fff;background:#e06c83;background:linear-gradient(#da3656, #e06c83);}
+        .custom_typecontrol .selected_btn:hover {color:#fff;}  
+
+        .custom_zoomcontrol {position:absolute;top:50px;right:10px;width:36px;height:80px;overflow:hidden;z-index:1;background-color:#f5f5f5;}
+        .custom_zoomcontrol span {display:block;width:36px;height:40px;text-align:center;cursor:pointer;}    
+        .custom_zoomcontrol span img {width:15px;height:15px;padding:12px 0;border:none;}            
+        .custom_zoomcontrol span:first-child{border-bottom:1px solid #bfbfbf;}            
+    </style>
+</head>
+<body>
+
+<div class="map_wrap">
+    <div id="map" style="width:100% ;height:100%;"></div>
+
+    <!-- 지도타입 컨트롤 div  -->
+    <div class="custom_typecontrol radius_border">
+        <span id="btnRoadmap" class="selected_btn" onclick="setMapType('roadmap')">지도</span>
+        <span id="btnSkyview" class="btn" onclick="setMapType('skyview')">스카이뷰</span>
+        <span id="btnHybrid" class="btn" onclick="setMapType('hybrid')">하이브리드</span>
+    </div>
+    <!-- 지도 확대, 축소 컨트롤 div  -->
+    <div class="custom_zoomcontrol radius_border">
+        <span onclick="zoomIn()"><img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/ico_plus.png" alt="확대"></span>  
+        <span onclick="zoomOut()"><img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/ico_minus.png" alt="축소"></span>
+    </div>
+</div>
+<!--지도 잠그기-
+<p>
+  <button onclick="setDraggable(false),setZoomable(false)">지도잠금</button>
+  <button onclick="setDraggable(true),setZoomable(true)">지도잠금풀기</button>
+</p>
+<---화면출력---->
+<div >
+  <button onclick="setOverlayMapTypeId('traffic')">교통정보</button>
+  <button onclick="setOverlayMapTypeId('roadview')">로드뷰</button>
+  <button onclick="setOverlayMapTypeId('terrain')">지형정보</button>
+  <button onclick="setOverlayMapTypeId('use_district')">지적편집도</button>
+</div>
+<p id="result"></p> <!--클릭이벤트시 정보출력-->
+<div id="clickLatlng"></div>
+<script type="text/javascript" src=" https://dapi.kakao.com/v2/maps/sdk.js?appkey=18b3fb379d9a4e523f45861623d0dee1 "></script>
+
+<script>
+var options = {
+        center: new kakao.maps.LatLng(37.667503, 127.044575), //기본지도로드 중심좌표:방학역
+       level: 5
+    };    
+var map = new kakao.maps.Map(document.getElementById('map'), options);
+
+// 지도를 클릭한 위치에 표출할 마커입니다
+var marker = new kakao.maps.Marker({ 
+    // 지도 중심좌표에 마커를 생성합니다 
+    position: map.getCenter() 
+}); 
+ㅌ
+
+
+/*--wlec---*/
+var currentTypeId; //기등록타입 제거 변수
+function setOverlayMapTypeId(maptype) {
+    var changeMaptype;// maptype에 따라 지도에 추가할 지도타입을 결정합니다
+   
+    if (maptype === 'traffic') { // 교통정보 지도타입  
+        if (currentTypeId === kakao.maps.MapTypeId.TRAFFIC) {
+            map.removeOverlayMapTypeId(kakao.maps.MapTypeId.TRAFFIC);
+            currentTypeId = undefined;
+            return; }
+        changeMaptype = kakao.maps.MapTypeId.TRAFFIC;    
+    } else if (maptype === 'roadview') {  // 로드뷰  
+        if (currentTypeId === kakao.maps.MapTypeId.ROADVIEW) {
+            map.removeOverlayMapTypeId(kakao.maps.MapTypeId.ROADVIEW);
+            currentTypeId = undefined;
+            return; }
+        changeMaptype = kakao.maps.MapTypeId.ROADVIEW;    
+    } else if (maptype === 'terrain')  {
+        if (currentTypeId === kakao.maps.MapTypeId.TERRAIN) {
+            map.removeOverlayMapTypeId(kakao.maps.MapTypeId.TERRAIN);
+            currentTypeId = undefined;
+            return; }changeMaptype = kakao.maps.MapTypeId.TERRAIN; // 지형정보  
+    } else if (maptype === 'use_district') {
+        if (currentTypeId === kakao.maps.MapTypeId.USE_DISTRICT) {
+            map.removeOverlayMapTypeId(kakao.maps.MapTypeId.USE_DISTRICT);
+            currentTypeId = undefined;
+            return; }changeMaptype = kakao.maps.MapTypeId.USE_DISTRICT; }// 지적편집도        
+    if (currentTypeId) {  map.removeOverlayMapTypeId(currentTypeId);  }  // 이미 등록된 지도 타입이 있으면 제거
+    map.addOverlayMapTypeId(changeMaptype);  // maptype에 해당하는 지도타입을 지도에 추가\
+    currentTypeId = changeMaptype;   // 지도에 추가된 타입정보를 갱신
+       
+  }
+
+
+/*----이벤트----*/
+getInfo();
+kakao.maps.event.addListener(map, 'dragend', getInfo);
+kakao.maps.event.addListener(map,  'zoom_changed', getInfo);
+kakao.maps.event.addListener(map, 'maptypeid_changed', getInfo);
+
+
+/*----지도타입 컨트롤----*/
+// 지도타입 컨트롤의 지도 또는 스카이뷰 버튼을 클릭하면 호출되어 지도타입을 바꾸는 함수
+function setMapType(maptype) {
+    var roadmapControl = document.getElementById('btnRoadmap');
+    var skyviewControl = document.getElementById('btnSkyview');
+    var hybridControl = document.getElementById('btnHybrid');
+
+    roadmapControl.className = 'btn';
+    skyviewControl.className = 'btn';
+    hybridControl.className = 'btn';
+
+    if (maptype === 'roadmap') {
+        map.setMapTypeId(kakao.maps.MapTypeId.ROADMAP);
+        roadmapControl.className = 'selected_btn';
+
+    } else if (maptype === 'skyview') {
+        map.setMapTypeId(kakao.maps.MapTypeId.SKYVIEW);
+        skyviewControl.className = 'selected_btn';
+    } else if (maptype === 'hybrid') {
+        map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
+        hybridControl.className = 'selected_btn';
+    }
+    getInfo();
+}
+
+/*----줌 컨트롤----*/
+function zoomIn() { // 지도 확대, 축소 컨트롤에서 확대 버튼을 누르면 호출되어 지도를 확대하는 함수입니다
+    map.setLevel(map.getLevel() - 1);
+    getInfo();}
+
+function zoomOut() { // 지도 확대, 축소 컨트롤에서 축소 버튼을 누르면 호출되어 지도를 확대하는 함수입니다
+    map.setLevel(map.getLevel() + 1);
+    getInfo();}
+
+
+function getInfo() {
+    var center = map.getCenter(); //현재중심좌표정보
+    var level = map.getLevel(); //현재레벨정보
+    var mapTypeId = map.getMapTypeId();  //지도타입정보
+    /*var bounds = map.getBounds(); //지도현재영역
+    var swLatLng = bounds.getSouthWest(); // 지도 위도정보
+    var neLatLng = bounds.getNorthEast(); //지도 경도정보
+    var boundsStr = bounds.toString(); //영역 문자열정보 ((남,서), (북,동)) 형식*/
+
+    if (mapTypeId=='1'){mapTypeId='기본지도'}
+    else if (mapTypeId=='2'){mapTypeId='스카이뷰'}
+    else if (mapTypeId=='3'){mapTypeId='하이브리드'}
+
+    /*----화면출력----*/
+    kakao.maps.event.addListener(map, 'click', function(mouseEvent) {    
+        var latlng = mouseEvent.latLng;
+        
+        // 지도에 마커를 표시합니다
+        marker.setMap(map);
+        // 마커 위치를 클릭한 위치로 옮깁니다
+        marker.setPosition(latlng);
+
+        var message = '선택한 지점의 위도 ' +latlng.getLat() + ',경도 ' + latlng.getLat() + ' 이고 <br> '
+                        +'지도 레벨은 '+ level + ' 입니다 <br>지도 타입은 ' + mapTypeId + ' 입니다. <br>';
+
+        var resultDiv  = document.getElementById('result');
+        resultDiv.innerHTML = message;
+    });
+}
+   
+     /*----이동기능막고풀기----
+     function setDraggable(draggable) { map.setDraggable(draggable); }  
+     ----줌기능막고풀기----
+     function setZoomable(zoomable) { map.setZoomable(zoomable); } */
+   
+</script>
+</body>
+</html>
